@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: json-crud-service
+
+resources:
+  - configmap.yaml
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+
+commonLabels:
+  app.kubernetes.io/name: json-crud-service
+  app.kubernetes.io/version: v1.0.0
+  app.kubernetes.io/component: api-server
+
+images:
+  - name: json-crud-service
+    newTag: latest
+
+namespace: default
+
+replicas:
+  - name: json-crud-service
+    count: 3

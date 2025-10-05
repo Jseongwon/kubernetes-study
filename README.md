@@ -131,14 +131,14 @@ curl -X DELETE http://localhost:8080/documents/doc1
 
 ## 기술 스택
 
-- **언어**: Go 1.21+
+- **언어**: Go 1.25+
 - **아키텍처**: Clean Architecture
 - **저장소**: In-Memory (메모리)
 - **HTTP 서버**: net/http (표준 라이브러리)
 
 ## 개발 환경 설정
 
-1. Go 1.21 이상 설치
+1. Go 1.25 이상 설치
 2. 저장소 클론
 3. 의존성 설치: `go mod tidy`
 4. 빌드: `go build -o bin/server cmd/server/main.go`

@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: json-crud-config
+  namespace: default
+  labels:
+    app: json-crud-service
+data:
+  port: "8080"
+  log_level: "info"
+  environment: "production"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: json-crud-secrets
+  namespace: default
+  labels:
+    app: json-crud-service
+type: Opaque
+data:
+  # Base64 encoded values (example values)
+  # api_key: <base64-encoded-api-key>
+  # database_password: <base64-encoded-password>
+stringData:
+  # Plain text values for development
+  api_key: "dev-api-key-12345"
+  database_url: "memory://localhost"

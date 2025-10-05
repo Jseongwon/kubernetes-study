@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"json-crud-service/internal/domain/entity"
 	"json-crud-service/internal/usecase"
 	"json-crud-service/pkg/response"
 	"net/http"
@@ -22,13 +23,16 @@ func NewJSONHandler(usecase *usecase.JSONUsecase) *JSONHandler {
 
 // CreateDocumentRequest represents the request payload for creating a document
 type CreateDocumentRequest struct {
-	ID   string                 `json:"id"`
-	Data map[string]interface{} `json:"data"`
+	ID      string                 `json:"id"`
+	Type    string                 `json:"type"`
+	Version string                 `json:"version"`
+	Data    map[string]interface{} `json:"data"`
 }
 
 // UpdateDocumentRequest represents the request payload for updating a document
 type UpdateDocumentRequest struct {
-	Data map[string]interface{} `json:"data"`
+	Data    map[string]interface{} `json:"data"`
+	Version string                 `json:"version,omitempty"`
 }
 
 // CreateDocument handles POST /documents
@@ -39,7 +43,7 @@ func (h *JSONHandler) CreateDocument(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	doc, err := h.usecase.CreateDocument(r.Context(), req.ID, req.Data)
+	doc, err := h.usecase.CreateDocument(r.Context(), req.ID, req.Type, req.Version, req.Data)
 	if err != nil {
 		if err == usecase.ErrInvalidID || err == usecase.ErrInvalidData {
 			response.BadRequest(w, err)
@@ -81,7 +85,16 @@ func (h *JSONHandler) UpdateDocument(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	doc, err := h.usecase.UpdateDocument(r.Context(), id, req.Data)
+	var doc *entity.JSONDocument
+	var err error
+
+	if req.Version != "" {
+		// Update with version
+		doc, err = h.usecase.UpdateDocumentWithVersion(r.Context(), id, req.Data, req.Version)
+	} else {
+		// Update without version change
+		doc, err = h.usecase.UpdateDocument(r.Context(), id, req.Data)
+	}
 	if err != nil {
 		if err == usecase.ErrInvalidID || err == usecase.ErrInvalidData {
 			response.BadRequest(w, err)

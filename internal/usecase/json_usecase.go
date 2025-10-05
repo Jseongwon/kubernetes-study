@@ -26,7 +26,7 @@ func NewJSONUsecase(repo repository.JSONRepository) *JSONUsecase {
 }
 
 // CreateDocument creates a new JSON document
-func (u *JSONUsecase) CreateDocument(ctx context.Context, id string, data map[string]interface{}) (*entity.JSONDocument, error) {
+func (u *JSONUsecase) CreateDocument(ctx context.Context, id, docType, version string, data map[string]interface{}) (*entity.JSONDocument, error) {
 	if id == "" {
 		return nil, ErrInvalidID
 	}
@@ -35,7 +35,7 @@ func (u *JSONUsecase) CreateDocument(ctx context.Context, id string, data map[st
 		return nil, ErrInvalidData
 	}
 	
-	doc := entity.NewJSONDocument(id, data)
+	doc := entity.NewJSONDocument(id, docType, version, data)
 	
 	if err := u.repo.Create(ctx, doc); err != nil {
 		return nil, err
@@ -82,6 +82,34 @@ func (u *JSONUsecase) UpdateDocument(ctx context.Context, id string, data map[st
 	}
 	
 	doc.Update(data)
+	
+	if err := u.repo.Update(ctx, doc); err != nil {
+		return nil, err
+	}
+	
+	return doc, nil
+}
+
+// UpdateDocumentWithVersion updates an existing JSON document with new version
+func (u *JSONUsecase) UpdateDocumentWithVersion(ctx context.Context, id string, data map[string]interface{}, newVersion string) (*entity.JSONDocument, error) {
+	if id == "" {
+		return nil, ErrInvalidID
+	}
+	
+	if data == nil {
+		return nil, ErrInvalidData
+	}
+	
+	doc, err := u.repo.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	
+	if doc == nil {
+		return nil, ErrDocumentNotFound
+	}
+	
+	doc.UpdateWithVersion(data, newVersion)
 	
 	if err := u.repo.Update(ctx, doc); err != nil {
 		return nil, err

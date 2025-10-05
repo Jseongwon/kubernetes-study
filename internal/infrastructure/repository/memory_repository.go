@@ -24,25 +24,27 @@ func NewMemoryJSONRepository() repository.JSONRepository {
 func (r *MemoryJSONRepository) Create(ctx context.Context, doc *entity.JSONDocument) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	
+
 	// Check if document already exists
 	if _, exists := r.documents[doc.ID]; exists {
 		return repository.ErrDocumentAlreadyExists
 	}
-	
+
 	// Create a copy to avoid external modifications
 	docCopy := &entity.JSONDocument{
 		ID:        doc.ID,
+		Type:      doc.Type,
+		Version:   doc.Version,
 		Data:      make(map[string]interface{}),
 		CreatedAt: doc.CreatedAt,
 		UpdatedAt: doc.UpdatedAt,
 	}
-	
+
 	// Deep copy the data map
 	for k, v := range doc.Data {
 		docCopy.Data[k] = v
 	}
-	
+
 	r.documents[doc.ID] = docCopy
 	return nil
 }
@@ -51,25 +53,27 @@ func (r *MemoryJSONRepository) Create(ctx context.Context, doc *entity.JSONDocum
 func (r *MemoryJSONRepository) GetByID(ctx context.Context, id string) (*entity.JSONDocument, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	
+
 	doc, exists := r.documents[id]
 	if !exists {
 		return nil, nil
 	}
-	
+
 	// Return a copy to avoid external modifications
 	docCopy := &entity.JSONDocument{
 		ID:        doc.ID,
+		Type:      doc.Type,
+		Version:   doc.Version,
 		Data:      make(map[string]interface{}),
 		CreatedAt: doc.CreatedAt,
 		UpdatedAt: doc.UpdatedAt,
 	}
-	
+
 	// Deep copy the data map
 	for k, v := range doc.Data {
 		docCopy.Data[k] = v
 	}
-	
+
 	return docCopy, nil
 }
 
@@ -77,25 +81,27 @@ func (r *MemoryJSONRepository) GetByID(ctx context.Context, id string) (*entity.
 func (r *MemoryJSONRepository) Update(ctx context.Context, doc *entity.JSONDocument) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	
+
 	// Check if document exists
 	if _, exists := r.documents[doc.ID]; !exists {
 		return repository.ErrDocumentNotFound
 	}
-	
+
 	// Create a copy to avoid external modifications
 	docCopy := &entity.JSONDocument{
 		ID:        doc.ID,
+		Type:      doc.Type,
+		Version:   doc.Version,
 		Data:      make(map[string]interface{}),
 		CreatedAt: doc.CreatedAt,
 		UpdatedAt: doc.UpdatedAt,
 	}
-	
+
 	// Deep copy the data map
 	for k, v := range doc.Data {
 		docCopy.Data[k] = v
 	}
-	
+
 	r.documents[doc.ID] = docCopy
 	return nil
 }
@@ -104,12 +110,12 @@ func (r *MemoryJSONRepository) Update(ctx context.Context, doc *entity.JSONDocum
 func (r *MemoryJSONRepository) Delete(ctx context.Context, id string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	
+
 	// Check if document exists
 	if _, exists := r.documents[id]; !exists {
 		return repository.ErrDocumentNotFound
 	}
-	
+
 	delete(r.documents, id)
 	return nil
 }
@@ -118,24 +124,26 @@ func (r *MemoryJSONRepository) Delete(ctx context.Context, id string) error {
 func (r *MemoryJSONRepository) List(ctx context.Context) ([]*entity.JSONDocument, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	
+
 	documents := make([]*entity.JSONDocument, 0, len(r.documents))
 	for _, doc := range r.documents {
 		// Create a copy for each document
 		docCopy := &entity.JSONDocument{
 			ID:        doc.ID,
+			Type:      doc.Type,
+			Version:   doc.Version,
 			Data:      make(map[string]interface{}),
 			CreatedAt: doc.CreatedAt,
 			UpdatedAt: doc.UpdatedAt,
 		}
-		
+
 		// Deep copy the data map
 		for k, v := range doc.Data {
 			docCopy.Data[k] = v
 		}
-		
+
 		documents = append(documents, docCopy)
 	}
-	
+
 	return documents, nil
 }
